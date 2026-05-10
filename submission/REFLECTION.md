@@ -78,7 +78,16 @@ Quyết định quan trọng nhất tôi thực hiện là chọn **judge model 
 
 ## 7. Benchmark interpretation (≥ 150 words)
 
-Trên bộ benchmark nhỏ của tôi, kết quả cho thấy cải thiện tương đối trên những bài test liên quan đến helpfulness/clarity (ví dụ AlpacaEval-lite tăng nhẹ), trong khi các benchmark yêu cầu tính toán chính xác như GSM8K/MATH không có cải thiện đáng kể và một vài bài độ chính xác giảm nhẹ (tương tự alignment tax). MMLU giữ tương đối ổn — không có bằng chứng về catastrophic forgetting ở quy mô này, nhưng cũng không có cải thiện đáng kể về factual knowledge. Điều này phù hợp với kỳ vọng: DPO tối ưu hoá lựa chọn được judge ưu tiên (helpfulness, safety), nên benchmark đánh giá reasoning tinh vi hoặc kiến thức chuyên sâu có thể không thay đổi tích cực, thậm chí có thể giảm nhẹ nếu β quá lớn hoặc dữ liệu preference thiên về concise/safe responses. Kết luận: DPO đã làm tốt nhiệm vụ alignment mong muốn (cải thiện helpfulness/safety theo judge), nhưng cần cân bằng thêm (cross-judge, β sweep) nếu mục tiêu là cải thiện benchmarks chuyên sâu như GSM8K.
+Score table from `data/eval/benchmark_results.json`:
+
+| Benchmark | SFT-only | SFT+DPO | Δ |
+|---|---:|---:|---:|
+| IFEval | 0.0 | 0.0 | 0.0 |
+| GSM8K | 1.0 | 1.0 | 0.0 |
+| MMLU (sampled) | 0.6666666667 | 0.6666666667 | 0.0 |
+| AlpacaEval-lite | 0.5 | 0.5 | 0.0 |
+
+Trên bộ benchmark này, tất cả các delta đều bằng 0.0 — tức là theo các phép đo sơ bộ trong `data/eval/benchmark_results.json`, việc thêm DPO không làm thay đổi điểm số so với SFT trên các benchmark được chạy (IFEval, GSM8K, MMLU, AlpacaEval-lite). Cụ thể, GSM8K không bị regress; MMLU duy trì điểm ~0.667, báo hiệu rằng không có dấu hiệu catastrophic forgetting ở thang đo kiểm thử nhỏ này; AlpacaEval-lite cũng không thay đổi. Diễn giải thực tế: ở quy mô và với tập dữ liệu đánh giá hiện có, DPO đã không cải thiện hay làm xấu những benchmark factual/reasoning đã đo — điều này có thể do nhiều nguyên nhân: (1) kích thước mẫu giới hạn và giới hạn số lượng case mỗi benchmark chạy (xem trường `limits` trong JSON), (2) judge và dữ liệu preference mà DPO tối ưu có thể hướng tới những cải thiện về phong cách/helpfulness mà các benchmark này không phản ánh, và (3) thời lượng huấn luyện/ngân sách nhỏ khiến hiệu ứng trên benchmarks lớn khó hiện rõ. Kết luận: kết quả benchmark hiện tại cho thấy DPO không gây tác động tiêu cực đến các benchmark đã chạy, nhưng cũng chưa cho thấy cải thiện rõ rệt; để kiểm chứng mạnh hơn cần chạy nhiều dữ liệu hơn, cross-judge và sweep β.
 
 ---
 
